@@ -15,7 +15,7 @@ class CvController extends Controller
      */
     public function create(): View
     {
-        return view('cv.create');
+        return view('cv.create', ['cvTemplate' => null]);
     }
 
     /**

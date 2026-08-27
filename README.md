@@ -8,7 +8,8 @@ Wypełniasz formularz, widzisz podgląd CV na żywo, wybierasz jeden z dwóch sz
 - Formularz z danymi osobowymi, doświadczeniem zawodowym, wykształceniem i umiejętnościami (pola powtarzalne — dodawaj/usuwaj wpisy)
 - Podgląd CV na żywo, aktualizowany w czasie rzeczywistym w trakcie wypełniania formularza (Alpine.js, bez przeładowania strony)
 - Dwa szablony wizualne: **Klasyczny** i **Nowoczesny**
-- Eksport do PDF ([dompdf](https://github.com/dompdf/dompdf)) — bez zapisywania danych w bazie, wszystko dzieje się w jednym żądaniu
+- Eksport do PDF ([dompdf](https://github.com/dompdf/dompdf))
+- Zapis CV jako szablonu do edycji później — generuje unikalny link (bez logowania), pod którym można wrócić i zaktualizować dane
 
 ## Wymagania
 
@@ -29,9 +30,12 @@ npm run build
 php artisan serve
 ```
 
-Aplikacja nie wymaga bazy danych — wszystkie dane z formularza trafiają bezpośrednio do generatora PDF w ramach jednego żądania, nic nie jest zapisywane.
-
 Po uruchomieniu `php artisan serve` strona będzie dostępna pod `http://127.0.0.1:8000`.
+
+Pobieranie CV jako PDF działa bez zapisywania czegokolwiek — dane z formularza trafiają bezpośrednio do generatora PDF
+w ramach jednego żądania. Opcja **„Zapisz jako szablon”** zapisuje dane w bazie (SQLite) i generuje unikalny,
+niedomyślny do odgadnięcia link do edycji — każdy, kto ten link zna, może edytować dany szablon (nie ma kont
+użytkowników), więc nie udostępniaj go publicznie.
 
 ### Tryb developerski (auto-przebudowa CSS/JS)
 
@@ -48,8 +52,10 @@ php artisan serve
 ## Struktura projektu
 
 - `app/Http/Controllers/CvController.php` — wyświetla formularz i generuje PDF
+- `app/Http/Controllers/CvTemplateController.php` — zapis/edycja/aktualizacja zapisanych szablonów CV
+- `app/Models/CvTemplate.php` — zapisany szablon CV (identyfikowany przez UUID w URL)
 - `app/Http/Requests/StoreCvRequest.php` — walidacja danych CV i przygotowanie ich do renderowania
-- `resources/views/cv/create.blade.php` — formularz + podgląd na żywo (Alpine.js)
+- `resources/views/cv/create.blade.php` — formularz + podgląd na żywo (Alpine.js), używany zarówno dla nowego CV, jak i edycji zapisanego szablonu
 - `resources/views/pdf/cv.blade.php` + `resources/views/pdf/partials/body.blade.php` — szablon PDF (dompdf)
 
 ## Uwaga dot. czcionek w PDF
