@@ -8,36 +8,7 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="bg-slate-100 text-slate-900 antialiased">
-        <div
-            x-data="{
-                template: 'classic',
-                personal: {
-                    first_name: '', last_name: '', title: '', email: '', phone: '', city: '', summary: '',
-                },
-                experience: [
-                    { company: '', position: '', period: '', description: '' },
-                ],
-                education: [
-                    { school: '', field: '', period: '' },
-                ],
-                skillsInput: '',
-                get skills() {
-                    return this.skillsInput.split(',').map(s => s.trim()).filter(Boolean);
-                },
-                addExperience() {
-                    this.experience.push({ company: '', position: '', period: '', description: '' });
-                },
-                removeExperience(index) {
-                    this.experience.splice(index, 1);
-                },
-                addEducation() {
-                    this.education.push({ school: '', field: '', period: '' });
-                },
-                removeEducation(index) {
-                    this.education.splice(index, 1);
-                },
-            }"
-        >
+        <div x-data="cvBuilder(@js($cvTemplate ? ['template' => $cvTemplate->template, ...$cvTemplate->data] : []))">
             <header class="border-b border-slate-200 bg-white">
                 <div class="mx-auto max-w-7xl px-6 py-4">
                     <h1 class="text-lg font-bold">Generator CV</h1>
@@ -50,6 +21,21 @@
 
                 {{-- Form column --}}
                 <div class="space-y-6 lg:col-span-5">
+                    @if (session('status'))
+                        <div class="rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
+                    @if ($cvTemplate)
+                        <div class="rounded-md border border-indigo-200 bg-indigo-50 px-4 py-3 text-sm text-indigo-700">
+                            <p class="font-medium">Ten szablon jest zapisany.</p>
+                            <p class="mt-1">Zachowaj ten link, aby wrócić do edycji później:</p>
+                            <input type="text" readonly value="{{ route('cv.templates.edit', $cvTemplate) }}" onclick="this.select()"
+                                   class="mt-1 w-full rounded-md border border-indigo-200 bg-white px-2 py-1 text-xs text-indigo-800">
+                        </div>
+                    @endif
+
                     @if ($errors->any())
                         <div class="rounded-md border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">
                             <p class="font-medium">Popraw poniższe pola:</p>
@@ -178,9 +164,23 @@
                                class="mt-2 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-indigo-400 focus:outline-none">
                     </section>
 
-                    <button type="submit" class="w-full rounded-md bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500">
-                        Pobierz CV jako PDF
-                    </button>
+                    <div class="space-y-2">
+                        <button type="submit" class="w-full rounded-md bg-indigo-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-indigo-500">
+                            Pobierz CV jako PDF
+                        </button>
+
+                        @if ($cvTemplate)
+                            <button type="submit" formaction="{{ route('cv.templates.update', $cvTemplate) }}"
+                                    class="w-full rounded-md border border-indigo-300 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">
+                                Zapisz zmiany w szablonie
+                            </button>
+                        @else
+                            <button type="submit" formaction="{{ route('cv.templates.store') }}"
+                                    class="w-full rounded-md border border-indigo-300 bg-white px-5 py-3 text-sm font-semibold text-indigo-700 transition hover:bg-indigo-50">
+                                Zapisz jako szablon do edycji później
+                            </button>
+                        @endif
+                    </div>
                 </div>
 
                 {{-- Live preview column --}}
